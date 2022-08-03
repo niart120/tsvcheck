@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "tsvcheck": {
+      "commandName": "Project"
+    }
+  }
+}
