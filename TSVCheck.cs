@@ -24,7 +24,7 @@ namespace tsvcheck
 
         public bool Check()
         {
-            Console.Write("Calculating... (will take a few hours) ");
+            Console.Write("Calculating... (This will take a few hours) ");
             var top = Console.CursorTop;
             var left = Console.CursorLeft;
             const int totalTicks = 4096;
