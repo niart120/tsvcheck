@@ -103,8 +103,27 @@ class Program
 			return;
 		}
 
+		
+
+		// Stopwatchクラス生成
+		var sw = new System.Diagnostics.Stopwatch();
+
+		//-----------------
+		// 計測開始
+		sw.Start();
+
 		TSVChecker checker = new TSVChecker(g7tid, ivs, nature, opts.IsUSUM, min, max);
 		checker.Check();
+
+		// 計測停止
+		sw.Stop();
+
+		// 結果表示
+		Console.WriteLine("Time elapsed:");
+		TimeSpan ts = sw.Elapsed;
+		Console.WriteLine($"　{ts}");
+		Console.WriteLine($"　{ts.Hours}h {ts.Minutes}m {ts.Seconds}s {ts.Milliseconds}ms");
+		Console.WriteLine($"　{sw.ElapsedMilliseconds}ms");
 
 	}
 
