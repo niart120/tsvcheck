@@ -80,7 +80,7 @@ class Program
 			validation = false;
 		}
 
-		Nature nature = CommonExtension.ConvertToNature(opts.NatureStr);
+		Nature nature = opts.NatureStr.ConvertToNature();
 
 		//validate range
 		if (!validateRange(opts.Range))
@@ -130,7 +130,7 @@ class Program
 
     private static bool validateNature(string nature)
     {
-        if (CommonExtension.ConvertToNature(nature) == Nature.other)
+        if (nature.ConvertToNature() == Nature.other)
         {
 			return false;
         };
