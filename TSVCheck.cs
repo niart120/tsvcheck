@@ -29,13 +29,14 @@ namespace tsvcheck
             var left = Console.CursorLeft;
             const int totalTicks = 4096;
 
-            for (uint i = 0; i < totalTicks; i++)
+            for (uint t = 0; t < totalTicks; t++)
             {
-                uint header = i << 20;
+                uint header = t << 20;
 
                 var result = Parallel.For(0, 1<<20, (i,state) => {
-                    uint seed = header|(uint)i;
-                    if(CheckSeed(seed)){
+                    uint seed = header | (uint)i;
+                    if (CheckSeed(seed))
+                    {
                         state.Stop();
                     }
                 });
@@ -44,8 +45,9 @@ namespace tsvcheck
                 {
                     return true;
                 }
+
                 Console.SetCursorPosition(left, top);
-                Console.Write($"{i+1}/{totalTicks}");
+                Console.Write($"{t+1}/{totalTicks}");
             }
             Console.WriteLine("Could not find TSV.");
             return false;
@@ -54,16 +56,20 @@ namespace tsvcheck
         private bool CheckSeed(uint seed)
         {
             //init SFMT
-            var seedhex = seed.ToString("X");
             var rng = new SFMT(seed);
-            int initAdv = isUSUM ? 1132 : 1012;
-            //init advance
-            int adv = 0;
-            for(;adv<initAdv;adv++) rng.GetRand64();
+
+            if (isUSUM)
+            {
+                rng.SkipUSUM();
+            }
+            else
+            {
+                rng.SkipSM();
+            }
 
             //calculate g7tid
             uint tmp = (uint)(rng.GetRand64() & 0xFFFFFFFF);
-            adv++;
+
             uint g7tid = tmp % 1_000_000;
             if (g7tid != this.g7tid) return false;
 
@@ -76,10 +82,10 @@ namespace tsvcheck
             int start = this.min;
             int end = this.max;
 
-            while (adv++ < start) rng.GetRand64();
+            while ((int)rng.Index64 < start) rng.GetRand64();
 
             List<ulong> randPool = new List<ulong>();
-            while (adv++<end+10) randPool.Add(rng.GetRand64());
+            while ((int)rng.Index64 < end+10) randPool.Add(rng.GetRand64());
 
             for(int i= 0; i < end - start; i++)
             {
