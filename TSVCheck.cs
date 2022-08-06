@@ -102,7 +102,7 @@ namespace tsvcheck
                 if (ivs.SequenceEqual(this.ivs) && nature == this.nature)
                 {
                     Console.WriteLine();
-                    Console.WriteLine($"TSV:{tsv}, TRV:{trv}, TID:{tid}, SID:{sid}, SEED:0x{seed.ToString("X")}, advance:{start+i}");
+                    Console.WriteLine($"TSV:{tsv}, TRV:{trv}, TID:{tid}, SID:{sid}, SEED:0x{seed.ToString("X8")}, advance:{start+i}");
                     return true;
                 }
             }
