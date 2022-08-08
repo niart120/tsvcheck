@@ -1,4 +1,7 @@
 ﻿using System.Linq;
+using static System.Runtime.Intrinsics.X86.Sse2;
+using System.Runtime.Intrinsics;
+
 namespace PokemonPRNG.SFMT
 
 /// <summary>
@@ -53,7 +56,7 @@ namespace PokemonPRNG.SFMT
 
             //内部状態配列初期化
             stateVector[0] = seed;
-            for (int i = 1; i < N32; i++) stateVector[i] = (uint)(1812433253 * (stateVector[i - 1] ^ (stateVector[i - 1] >> 30)) + i);
+            for (int i = 1; i < stateVector.Length; i++) stateVector[i] = (uint)(1812433253 * (stateVector[i - 1] ^ (stateVector[i - 1] >> 30)) + i);
 
             //確認
             PeriodCertification();
@@ -145,35 +148,52 @@ namespace PokemonPRNG.SFMT
         /// <summary>
         /// gen_rand_allの(2^19937-1)周期用。
         /// </summary>
-        private void GenerateRandAll()
+        private unsafe void GenerateRandAll()
         {
-            uint[] p = this.stateVector;
-
-            const int cMEXP = 19937;
-            const int cPOS1 = 122;
-            const uint cMSK1 = 0xdfffffefU;
-            const uint cMSK2 = 0xddfecb7fU;
-            const uint cMSK3 = 0xbffaffffU;
-            const uint cMSK4 = 0xbffffff6U;
-            const int cSL1 = 18;
-            const int cSR1 = 11;
-            const int cN = cMEXP / 128 + 1;
-            const int cN32 = cN * 4;
-
-            int a = 0;
-            int b = cPOS1 * 4;
-            int c = (cN - 2) * 4;
-            int d = (cN - 1) * 4;
-            do
+            fixed (uint* pPtr = this.stateVector)
             {
-                p[a + 3] = p[a + 3] ^ (p[a + 3] << 8) ^ (p[a + 2] >> 24) ^ (p[c + 3] >> 8) ^ ((p[b + 3] >> cSR1) & cMSK4) ^ (p[d + 3] << cSL1);
-                p[a + 2] = p[a + 2] ^ (p[a + 2] << 8) ^ (p[a + 1] >> 24) ^ (p[c + 3] << 24) ^ (p[c + 2] >> 8) ^ ((p[b + 2] >> cSR1) & cMSK3) ^ (p[d + 2] << cSL1);
-                p[a + 1] = p[a + 1] ^ (p[a + 1] << 8) ^ (p[a + 0] >> 24) ^ (p[c + 2] << 24) ^ (p[c + 1] >> 8) ^ ((p[b + 1] >> cSR1) & cMSK2) ^ (p[d + 1] << cSL1);
-                p[a + 0] = p[a + 0] ^ (p[a + 0] << 8) ^ (p[c + 1] << 24) ^ (p[c + 0] >> 8) ^ ((p[b + 0] >> cSR1) & cMSK1) ^ (p[d + 0] << cSL1);
-                c = d; d = a; a += 4; b += 4;
-                if (b >= cN32) b = 0;
-            } while (a < cN32);
+                var r1 = LoadVector128(pPtr+4*(N-2));
+                var r2 = LoadVector128(pPtr+4*(N-1));
+                int i=0;
+                for (; i < N - POS1; i++)
+                {
+                    Store(pPtr + 4*i, mm_recursion(LoadVector128(pPtr + 4 * i), LoadVector128(pPtr + 4 * (i + POS1)), r1, r2));
+                    r1 = r2;
+                    r2 = LoadVector128(pPtr + 4*i);
+                }
+                for (; i < N; i++)
+                {
+                    Store(pPtr + 4*i, mm_recursion(LoadVector128(pPtr + 4 * i), LoadVector128(pPtr + 4*(i + POS1 - N)), r1, r2));
+                    r1 = r2;
+                    r2 = LoadVector128(pPtr + 4*i);
+                }
+            } ;
+            ;
+
         }
+
+        public readonly uint[] MSK = new uint[] { MSK1, MSK2, MSK3, MSK4 };
+        private unsafe Vector128<uint> mm_recursion(Vector128<uint> a, Vector128<uint> b, Vector128<uint> c, Vector128<uint> d)
+        {
+            Vector128<uint> v, x, y, z, r;
+
+            fixed (uint* pMSK = MSK)
+            {
+                var MASK = LoadVector128(pMSK);
+
+                y = ShiftRightLogical(b, SR1);
+                z = ShiftRightLogical128BitLane(c, SR2);
+                v = ShiftLeftLogical(d, SL1);
+                z = Xor(z, a);
+                z = Xor(z, v);
+                x = ShiftLeftLogical128BitLane(a, SL2);
+                y = And(y, MASK);
+                z = Xor(z, x);
+                r = Xor(z, y);
+                return r;
+            }
+        }
+        
 
     }
 }
