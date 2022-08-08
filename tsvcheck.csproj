@@ -9,6 +9,7 @@
     <FileVersion>1.0.0.0</FileVersion>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <StartupObject>Program</StartupObject>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
