@@ -1,5 +1,6 @@
 ﻿using PokemonStandardLibrary;
 using PokemonPRNG.SFMT;
+using tsvcheckGUI;
 
 namespace tsvcheck
 {
@@ -11,8 +12,9 @@ namespace tsvcheck
         private readonly bool isUSUM;
         private readonly int min;
         private readonly int max;
+        private Form1 form;
 
-        public TSVChecker(uint g7TID, List<uint> IVs, Nature Nature, bool IsUSUM, int Min, int Max)
+        public TSVChecker(uint g7TID, List<uint> IVs, Nature Nature, bool IsUSUM, int Min, int Max, Form1 Form)
         {
             g7tid = g7TID;
             ivs = IVs;
@@ -20,14 +22,13 @@ namespace tsvcheck
             isUSUM = IsUSUM;
             min = Min;
             max = Max;
+            form = Form;
         }
 
-        public bool Check()
+        public bool Check(CancellationToken ct)
         {
-            Console.Write("Calculating... (This will take a few hours) ");
-            var top = Console.CursorTop;
-            var left = Console.CursorLeft;
             const int totalTicks = 4096;
+            form.ResetProgress();
 
             for (uint t = 0; t < totalTicks; t++)
             {
@@ -46,10 +47,15 @@ namespace tsvcheck
                     return true;
                 }
 
-                Console.SetCursorPosition(left, top);
-                Console.Write($"{t+1}/{totalTicks}");
+                if (ct.IsCancellationRequested)
+                {
+                    form.InvokeLogBoxWriteLine("Search Cancel.");
+                    return false;
+                }
+
+                form.IncrementProgress();
             }
-            Console.WriteLine("Could not find TSV.");
+            form.InvokeLogBoxWriteLine("Could not find TSV.");
             return false;
         }
 
@@ -101,8 +107,8 @@ namespace tsvcheck
                 Nature nature = (Nature)(randPool[i + 7] % 25);
                 if (ivs.SequenceEqual(this.ivs) && nature == this.nature)
                 {
-                    Console.WriteLine();
-                    Console.WriteLine($"TSV:{tsv}, TRV:{trv}, TID:{tid}, SID:{sid}, SEED:0x{seed.ToString("X8")}, advance:{start+i}");
+                    form.InvokeLogBoxWriteLine("Search Successful.");
+                    form.InvokeLogBoxWriteLine($"TSV:{tsv}, TRV:{trv}, TID:{tid}, SID:{sid}, SEED:0x{seed.ToString("X8")}, advance:{start+i}");
                     return true;
                 }
             }

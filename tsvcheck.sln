@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "tsvcheck", "tsvcheck.csproj
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PokemonStandardLibrary", "..\PokemonStandardLibrary\PokemonStandardLibrary\PokemonStandardLibrary.csproj", "{93E0040C-CAC9-42D6-BE73-8967ADE1A3ED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tsvcheckGUI", "..\tsvcheckGUI\tsvcheckGUI.csproj", "{A04F85A9-E5AE-4F18-A8C8-DB3E9A18F273}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tsvcheckCUI", "..\tsvcheckCUI\tsvcheckCUI.csproj", "{A04F85A9-E5AE-4F18-A8C8-DB3E9A18F273}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using static System.Runtime.Intrinsics.X86.Sse2;
 using System.Runtime.Intrinsics;
-
 namespace PokemonPRNG.SFMT
 
 /// <summary>
@@ -15,6 +14,7 @@ namespace PokemonPRNG.SFMT
     /// </summary>
     public class SFMT
     {
+
         /// <summary>
         /// 周期を表す指数。
         /// </summary>
@@ -24,14 +24,15 @@ namespace PokemonPRNG.SFMT
         public const int SL2 = 1;
         public const int SR1 = 11;
         public const int SR2 = 1;
-        public const uint MSK1 = 0xdfffffef;
-        public const uint MSK2 = 0xddfecb7f;
-        public const uint MSK3 = 0xbffaffff;
-        public const uint MSK4 = 0xbffffff6;
-        public const uint PARITY1 = 0x00000001;
-        public const uint PARITY2 = 0x00000000;
-        public const uint PARITY3 = 0x00000000;
-        public const uint PARITY4 = 0x13c9e684;
+        public const uint MSK1 = 0xdfffffefU;
+        public const uint MSK2 = 0xddfecb7fU;
+        public const uint MSK3 = 0xbffaffffU;
+        public const uint MSK4 = 0xbffffff6U;
+        public const uint PARITY1 = 0x00000001U;
+        public const uint PARITY2 = 0x00000000U;
+        public const uint PARITY3 = 0x00000000U;
+        public const uint PARITY4 = 0x13c9e684U;
+
 
         /// <summary>
         /// 各要素を128bitとしたときの内部状態ベクトルの個数。
@@ -56,7 +57,7 @@ namespace PokemonPRNG.SFMT
 
             //内部状態配列初期化
             stateVector[0] = seed;
-            for (int i = 1; i < stateVector.Length; i++) stateVector[i] = (uint)(1812433253 * (stateVector[i - 1] ^ (stateVector[i - 1] >> 30)) + i);
+            for (int i = 1; i < N32; i++) stateVector[i] = (uint)(1812433253 * (stateVector[i - 1] ^ (stateVector[i - 1] >> 30)) + i);
 
             //確認
             PeriodCertification();
@@ -150,6 +151,7 @@ namespace PokemonPRNG.SFMT
         /// </summary>
         private unsafe void GenerateRandAll()
         {
+
             fixed (uint* pPtr = this.stateVector)
             {
                 var r1 = LoadVector128(pPtr+4*(N-2));
@@ -163,7 +165,7 @@ namespace PokemonPRNG.SFMT
                 }
                 for (; i < N; i++)
                 {
-                    Store(pPtr + 4*i, mm_recursion(LoadVector128(pPtr + 4 * i), LoadVector128(pPtr + 4*(i + POS1 - N)), r1, r2));
+                    Store(pPtr + 4*i, mm_recursion(LoadVector128(pPtr + 4*i), LoadVector128(pPtr + 4*(i + POS1 - N)), r1, r2));
                     r1 = r2;
                     r2 = LoadVector128(pPtr + 4*i);
                 }
@@ -190,8 +192,9 @@ namespace PokemonPRNG.SFMT
                 y = And(y, MASK);
                 z = Xor(z, x);
                 r = Xor(z, y);
-                return r;
             }
+            return r;
+
         }
         
 
